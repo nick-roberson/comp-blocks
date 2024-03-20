@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "comp-blocks"
+version = "0.1.0"
+description = ""
+authors = ["nick-roberson <nicholas.roberson.95@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+black = "^24.3.0"
+pandas = "^2.2.1"
+rich = "^13.7.1"
+pydantic = "^2.6.4"
+typing-extensions = "^4.10.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
