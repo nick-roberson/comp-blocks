@@ -6,9 +6,9 @@ import pytest
 
 # My Imports
 from src.blocks.average.average import AverageBlock, AverageBlockParams
-from src.blocks.block_runner import BlockRunner
-from src.blocks.parallel_runner import ParallelRunner
-from src.blocks.sequential_runner import SequentialRunner
+from src.runners.block_runner import BlockRunner
+from src.runners.parallel_runner import ParallelRunner
+from src.runners.sequential_runner import SequentialRunner
 
 # Define the test parameters and data
 TEST_COLUMNS: Dict[str, str] = {
