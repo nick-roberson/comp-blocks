@@ -1,12 +1,13 @@
 # Third Party Imports
 import hashlib
+import time
 
 import pandas as pd
-from pydantic import BaseModel
 from typing_extensions import override
 
 # My Imports
-from src.blocks.block_base import BlockBase
+from src.block_base import BlockBase
+from src.params_base import BlockParamBase
 
 HASH_LENGTH: int = 16
 
@@ -28,14 +29,30 @@ def convert_columns_to_snake_case(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-class PrepareBlock(BlockBase):
+class PrepareBlockParams(BlockParamBase):
+    id_col: str = "id"
 
-    ID_COL: str = "id"
+
+class PrepareBlock(BlockBase):
+    """Prepare block to clean and prepare the input data."""
+
+    params: PrepareBlockParams = PrepareBlockParams()
 
     def __call__(self, input_df: pd.DataFrame) -> pd.DataFrame:
         """Call the block and return the result"""
         self.validate(input_df=input_df)
-        return self.run(input_df=input_df)
+
+        # Run the block with any input data
+        num_retries = self.params.attempts
+        retry_delay = self.params.retry_delay
+        while num_retries > 0:
+            try:
+                return self.run(input_df=input_df)
+            except Exception as e:
+                num_retries -= 1
+                if num_retries == 0:
+                    raise e
+                time.sleep(retry_delay)
 
     @override
     def validate(self, input_df: pd.DataFrame) -> None:
@@ -50,15 +67,15 @@ class PrepareBlock(BlockBase):
         output_df = convert_columns_to_snake_case(input_df.copy())
 
         # If ID_COL does not exist, add it
-        if self.ID_COL not in output_df.columns:
-            output_df[self.ID_COL] = output_df.apply(hash_row_values, axis=1)
+        if self.params.id_col not in output_df.columns:
+            output_df[self.params.id_col] = output_df.apply(hash_row_values, axis=1)
 
         # Delete duplicate rows
         output_df.drop_duplicates(inplace=True)
 
         # Reorder cols to put ID_COL first
         cols = output_df.columns.tolist()
-        cols.remove(self.ID_COL)
-        output_df = output_df[[self.ID_COL] + cols]
+        cols.remove(self.params.id_col)
+        output_df = output_df[[self.params.id_col] + cols]
 
         return output_df

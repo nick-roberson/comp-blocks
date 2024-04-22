@@ -1,10 +1,9 @@
 from typing import Dict
 
 import pandas as pd
-from pydantic import BaseModel
 
 # My Imports
-from src.blocks.block_base import BlockBase
+from src.block_base import BlockBase
 
 
 class SequentialRunner(BlockBase):

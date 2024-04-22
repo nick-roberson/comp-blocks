@@ -1,11 +1,10 @@
 # Third Party Imports
-from unittest.mock import MagicMock
 
 import pandas as pd
 import pytest
 
 # My Imports
-from src.blocks.block_base import BlockBase
+from src.block_base import BlockBase
 from src.runners.parallel_runner import ParallelRunner
 
 # Define test data

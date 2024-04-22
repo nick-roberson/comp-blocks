@@ -4,8 +4,8 @@ import pandas as pd
 import typer
 from pydantic import BaseModel
 
+from src.block_base import BlockBase
 from src.blocks.average.average import AverageBlock, AverageBlockParams
-from src.blocks.block_base import BlockBase
 from src.blocks.prepare.prepare import PrepareBlock
 from src.runners.parallel_runner import ParallelRunner
 from src.runners.sequential_runner import SequentialRunner

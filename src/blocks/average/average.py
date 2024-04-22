@@ -1,15 +1,17 @@
 # Third Party Imports
+import time
 from typing import Dict
 
 import pandas as pd
-from pydantic import BaseModel, field_validator
+from pydantic import field_validator
 from typing_extensions import override
 
 # My Imports
-from src.blocks.block_base import BlockBase
+from src.block_base import BlockBase
+from src.params_base import BlockParamBase
 
 
-class AverageBlockParams(BaseModel):
+class AverageBlockParams(BlockParamBase):
 
     column_mapping: Dict[str, str]
 
@@ -34,7 +36,17 @@ class AverageBlock(BlockBase):
     def __call__(self, input_df: pd.DataFrame) -> pd.DataFrame:
         """Call the block and return the result"""
         self.validate(input_df=input_df)
-        return self.run(input_df=input_df)
+        # Run the block with any input data
+        num_retries = self.params.attempts
+        retry_delay = self.params.retry_delay
+        while num_retries > 0:
+            try:
+                return self.run(input_df=input_df)
+            except Exception as e:
+                num_retries -= 1
+                if num_retries == 0:
+                    raise e
+                time.sleep(retry_delay)
 
     @override
     def validate(self, input_df: pd.DataFrame) -> None:
