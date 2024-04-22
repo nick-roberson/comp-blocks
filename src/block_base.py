@@ -1,3 +1,4 @@
+import logging
 import time
 
 import pandas as pd
@@ -20,7 +21,13 @@ class BlockBase(BaseModel):
             except Exception as e:
                 num_attempts -= 1
                 if num_attempts == 0:
+                    logging.info(
+                        f"Failed to run block {self.__class__.__name__} with error: {e}"
+                    )
                     raise e
+                logging.info(
+                    f"Failed to run block {self.__class__.__name__} with error: {e}. Retrying in {retry_delay} seconds."
+                )
                 time.sleep(retry_delay)
 
     def validate(self, input_df: pd.DataFrame) -> None:
