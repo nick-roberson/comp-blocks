@@ -17,7 +17,12 @@ class BlockBase(BaseModel):
         retry_delay = self.params.retry_delay
         while num_attempts > 0:
             try:
-                return self.run(input_df=input_df)
+                start_time = time.time()
+                result = self.run(input_df=input_df)
+                logging.info(
+                    f"Block {self.__class__.__name__} ran in {time.time() - start_time:.2f} seconds."
+                )
+                return result
             except Exception as e:
                 num_attempts -= 1
                 if num_attempts == 0:
