@@ -8,6 +8,8 @@ from typing_extensions import override
 # My Imports
 from src.blocks.block_base import BlockBase
 
+HASH_LENGTH: int = 16
+
 
 def to_snake_case(s: str) -> str:
     """Converts a string to snake_case."""
@@ -16,7 +18,8 @@ def to_snake_case(s: str) -> str:
 
 def hash_row_values(row: pd.Series) -> str:
     """Hashes the values of a DataFrame row using SHA-256 and returns the hash as a hex string."""
-    return hashlib.sha256("".join(str(row.values)).encode()).hexdigest()
+    hash_val = hashlib.sha256("".join(str(row.values)).encode()).hexdigest()
+    return hash_val[:HASH_LENGTH]
 
 
 def convert_columns_to_snake_case(df: pd.DataFrame) -> pd.DataFrame:
@@ -52,5 +55,10 @@ class PrepareBlock(BlockBase):
 
         # Delete duplicate rows
         output_df.drop_duplicates(inplace=True)
+
+        # Reorder cols to put ID_COL first
+        cols = output_df.columns.tolist()
+        cols.remove(self.ID_COL)
+        output_df = output_df[[self.ID_COL] + cols]
 
         return output_df
