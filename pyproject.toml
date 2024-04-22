@@ -13,6 +13,7 @@ rich = "^13.7.1"
 pydantic = "^2.6.4"
 typing-extensions = "^4.10.0"
 coverage = "^7.4.4"
+pytest = "^8.1.1"
 
 
 [build-system]
