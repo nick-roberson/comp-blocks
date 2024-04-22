@@ -7,9 +7,13 @@ from pydantic import BaseModel
 from src.blocks.block_base import BlockBase
 
 
-class SequentialRunner(BaseModel):
+class SequentialRunner(BlockBase):
 
-    block: Dict[int, BlockBase]
+    block_map: Dict[int, BlockBase]
+
+    def __call__(self, *args, **kwargs):
+        """Call the block and return the result"""
+        return self.run(*args, **kwargs)
 
     def run(self, input_df: pd.DataFrame) -> pd.DataFrame:
         """Run the blocks that the runner was initialized with in order
@@ -18,7 +22,7 @@ class SequentialRunner(BaseModel):
         result = input_df
 
         # Sort the blocks by order
-        ordered_blocks = sorted(self.block.items(), key=lambda x: x[0])
+        ordered_blocks = sorted(self.block_map.items(), key=lambda x: x[0])
 
         # Run in order
         for order, block in ordered_blocks:

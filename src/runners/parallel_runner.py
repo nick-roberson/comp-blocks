@@ -1,4 +1,5 @@
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
+from concurrent.futures import (ProcessPoolExecutor, ThreadPoolExecutor,
+                                as_completed)
 from typing import Dict, List
 
 import pandas as pd
@@ -8,7 +9,7 @@ from pydantic import BaseModel
 from src.blocks.block_base import BlockBase
 
 
-class ParallelRunner(BaseModel):
+class ParallelRunner(BlockBase):
 
     # The blocks to run in parallel
     block: BlockBase
@@ -20,6 +21,10 @@ class ParallelRunner(BaseModel):
     # Two different ways to parallelize
     use_process_pool: bool = False
     use_thread_pool: bool = False
+
+    def __call__(self, *args, **kwargs):
+        """Call the block and return the result"""
+        return self.run(*args, **kwargs)
 
     @property
     def runner_name(self) -> str:

@@ -80,10 +80,10 @@ def test_run_sequential():
 
     # create sequential runner
     sequential_blocks = {1: block_1, 2: block_2, 3: block_3}
-    sequential_runner = SequentialRunner(block=sequential_blocks)
+    sequential_runner = SequentialRunner(block_map=sequential_blocks)
 
     # run blocks
-    result = sequential_runner.run(TEST_DATA)
+    result = sequential_runner(TEST_DATA)
 
     # check result
     assert result.equals(TEST_RESULT)
@@ -118,7 +118,7 @@ def test_run_parallel_chunk_size(
     )
 
     # run blocks
-    result = parallel_runner.run(TEST_DATA)
+    result = parallel_runner(TEST_DATA)
 
     # check result len and general structure
     assert result is not None
@@ -160,7 +160,7 @@ def test_run_parallel_num_chunks(
     )
 
     # run blocks
-    result = parallel_runner.run(TEST_DATA)
+    result = parallel_runner(TEST_DATA)
 
     # check result len and general structure
     assert result is not None
