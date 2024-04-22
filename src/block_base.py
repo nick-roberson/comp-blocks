@@ -4,9 +4,13 @@ import time
 import pandas as pd
 from pydantic import BaseModel
 
+from src.params_base import BlockParamBase
+
 
 class BlockBase(BaseModel):
     """Base class for all blocks, which are the building blocks of the pipeline."""
+
+    params: BlockParamBase = BlockParamBase()
 
     def __call__(self, input_df: pd.DataFrame) -> pd.DataFrame:
         """Call the block and return the result"""

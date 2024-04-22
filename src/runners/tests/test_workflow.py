@@ -2,7 +2,6 @@
 import pandas as pd
 import pytest
 
-# My Imports
 from src.block_base import BlockBase
 from src.blocks.average.average import AverageBlock, AverageBlockParams
 from src.blocks.prepare.prepare import PrepareBlock

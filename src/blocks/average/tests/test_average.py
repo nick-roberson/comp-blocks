@@ -4,7 +4,6 @@ from typing import Dict
 import pandas as pd
 import pytest
 
-# My Imports
 from src.blocks.average.average import AverageBlock, AverageBlockParams
 from src.runners.block_runner import BlockRunner
 from src.runners.parallel_runner import ParallelRunner

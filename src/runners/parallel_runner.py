@@ -1,10 +1,10 @@
+import logging
 from concurrent.futures import (ProcessPoolExecutor, ThreadPoolExecutor,
                                 as_completed)
 from typing import List
 
 import pandas as pd
 
-# My Imports
 from src.block_base import BlockBase
 
 
@@ -21,10 +21,6 @@ class ParallelRunner(BlockBase):
     use_process_pool: bool = False
     use_thread_pool: bool = False
 
-    def __call__(self, *args, **kwargs):
-        """Call the block and return the result"""
-        return self.run(*args, **kwargs)
-
     @property
     def runner_name(self) -> str:
         """Return the name of the runner"""
@@ -35,7 +31,11 @@ class ParallelRunner(BlockBase):
         """Return the name of the block"""
         return self.block.__class__.__name__
 
-    def validate_runner(self):
+    def validate(self, input_df: pd.DataFrame) -> None:
+        """Override the validate method to add additional validation."""
+        pass
+
+    def validate_runner(self) -> None:
         """Simple validation on params."""
         if not self.use_process_pool and not self.use_thread_pool:
             raise ValueError("Either use_process_pool or use_thread_pool must be True")
@@ -93,7 +93,7 @@ class ParallelRunner(BlockBase):
             # Submit the tasks
             futures = {}
             for chunk in chunks:
-                print(
+                logging.debug(
                     f"Running block {self.block.__class__} with chunk\n{chunk.head(10)}"
                 )
                 future = executor.submit(self.block, chunk)
@@ -105,7 +105,7 @@ class ParallelRunner(BlockBase):
                 try:
                     results.append(future.result())
                 except Exception as e:
-                    print(f"Block {block.__class__} failed with error: {e}")
+                    logging.debug(f"Block {block.__class__} failed with error: {e}")
                     raise e
         return results
 
@@ -117,7 +117,7 @@ class ParallelRunner(BlockBase):
             # Submit the tasks
             futures = {}
             for chunk in chunks:
-                print(
+                logging.debug(
                     f"Running block {self.block.__class__} with chunk\n{chunk.head(10)}"
                 )
                 future = executor.submit(self.block, chunk)
@@ -129,7 +129,7 @@ class ParallelRunner(BlockBase):
                 try:
                     results.append(future.result())
                 except Exception as e:
-                    print(f"Block {block.__class__} failed with error: {e}")
+                    logging.debug(f"Block {block.__class__} failed with error: {e}")
                     raise e
         return results
 
@@ -141,30 +141,30 @@ class ParallelRunner(BlockBase):
 
         # Generate the chunks
         chunks = self.split(input_df)
-        print(f"Split the dataframe into {len(chunks)} chunks")
+        logging.debug(f"Split the dataframe into {len(chunks)} chunks")
 
         # Run in parallel
         results = []
         if self.use_process_pool:
             results = self.run_process_pool(chunks=chunks)
-            print(
+            logging.debug(
                 f"Completed running ProcessPool block {self.runner_name} for block {self.block_name}"
                 f"with {len(results)}"
             )
         elif self.use_thread_pool:
             results = self.run_thread_pool(chunks=chunks)
-            print(
+            logging.debug(
                 f"Completed running ThreadPool block {self.runner_name} for block {self.block_name}"
                 f"with {len(results)}"
             )
 
         # Merge the results
         for result in results:
-            print(result.head(10))
+            logging.debug(result.head(10))
 
         result = self.merge(results)
-        print(f"Merged the results into a dataframe with shape {result.shape}")
-        print(f"Head of the merged dataframe\n{result.head(10)}")
+        logging.debug(f"Merged the results into a dataframe with shape {result.shape}")
+        logging.debug(f"Head of the merged dataframe\n{result.head(10)}")
 
         # Return the result
         return result

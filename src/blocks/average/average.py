@@ -6,7 +6,6 @@ import pandas as pd
 from pydantic import field_validator
 from typing_extensions import override
 
-# My Imports
 from src.block_base import BlockBase
 from src.params_base import BlockParamBase
 

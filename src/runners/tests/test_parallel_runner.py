@@ -3,7 +3,6 @@
 import pandas as pd
 import pytest
 
-# My Imports
 from src.block_base import BlockBase
 from src.runners.parallel_runner import ParallelRunner
 
@@ -51,8 +50,6 @@ def test_parallel_runner_basic(use_process_pool, use_thread_pool):
     expected_result = expected_result.sort_values(by="ColumnA").reset_index(drop=True)
 
     # Check that results are as expected
-    print(result)
-    print(expected_result)
     assert result.equals(
         expected_result
     ), "The result should match the expected modified DataFrame"
