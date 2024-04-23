@@ -1,5 +1,3 @@
-# Third Party Imports
-import time
 from typing import Dict
 
 import pandas as pd
@@ -18,11 +16,11 @@ class AverageBlockParams(BlockParamBase):
     def validate_columns(cls, value: Dict[str, str]) -> Dict[str, str]:
         """Validate that the columns are valid"""
         if not isinstance(value, dict):
-            raise ValueError("columns must be a list")
+            raise ValueError("columns must be a dict")
         if not all([isinstance(col, str) for col in value]):
-            raise ValueError("columns must be a list of strings")
+            raise ValueError("columns must be a dict of strings")
         if not all([isinstance(avg_col, str) for avg_col in value.values()]):
-            raise ValueError("columns must be a list of strings")
+            raise ValueError("columns must be a dict of strings")
         if len(value.keys()) == 0:
             raise ValueError("columns must be non-empty")
         return value

@@ -5,8 +5,9 @@ import typer
 from pydantic import BaseModel
 
 from src.block_base import BlockBase
-from src.blocks.average.average import AverageBlock, AverageBlockParams
-from src.blocks.prepare.prepare import PrepareBlock
+from src.blocks.prepare.prepare_block import PrepareBlock
+from src.blocks.simple.average.average_block import (AverageBlock,
+                                                     AverageBlockParams)
 from src.runners.parallel_runner import ParallelRunner
 from src.runners.sequential_runner import SequentialRunner
 
@@ -63,7 +64,7 @@ def example():
 
     sequential_runner = SequentialRunner(
         block_map={
-            0: PrepareBlock(),
+            1: PrepareBlock(),
             2: ParallelRunner(
                 block=AddNBlock(params=AddNBlockParams(n=5)),
                 chunk_size=5,

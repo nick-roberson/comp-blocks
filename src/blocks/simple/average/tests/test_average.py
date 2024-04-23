@@ -1,10 +1,10 @@
-# Third Party Imports
 from typing import Dict
 
 import pandas as pd
 import pytest
 
-from src.blocks.average.average import AverageBlock, AverageBlockParams
+from src.blocks.simple.average.average_block import (AverageBlock,
+                                                     AverageBlockParams)
 from src.runners.block_runner import BlockRunner
 from src.runners.parallel_runner import ParallelRunner
 from src.runners.sequential_runner import SequentialRunner

@@ -1,10 +1,9 @@
-# Third Party Imports
 import hashlib
 
 import pandas as pd
 import pytest
 
-from src.blocks.prepare.prepare import PrepareBlock
+from src.blocks.prepare.prepare_block import PrepareBlock
 from src.runners.block_runner import BlockRunner
 from src.runners.parallel_runner import ParallelRunner
 from src.runners.sequential_runner import SequentialRunner
