@@ -1,8 +1,10 @@
 import logging
+import time
 
 import pandas as pd
 import typer
 from pydantic import BaseModel
+from rich import print
 
 from src.block_base import BlockBase
 from src.blocks.prepare.prepare_block import PrepareBlock
@@ -10,6 +12,7 @@ from src.blocks.simple.average.average_block import (AverageBlock,
                                                      AverageBlockParams)
 from src.runners.parallel_runner import ParallelRunner
 from src.runners.sequential_runner import SequentialRunner
+from src.utils.wrapper import log_run_info
 
 app = typer.Typer()
 
@@ -30,9 +33,12 @@ class AddNBlock(BlockBase):
     params: AddNBlockParams
 
     def __call__(self, input_df: pd.DataFrame):
-        logging.info(f"Adding {self.params.n} to all values in 'column_a'")
+        return self.run(input_df)
+
+    @log_run_info
+    def run(self, input_df: pd.DataFrame):
         result_df = input_df.copy()
-        result_df["column_a"] += self.params.n
+        result_df["column_b"] += self.params.n
         return result_df
 
 
@@ -44,7 +50,10 @@ class MultiplyByNBlock(BlockBase):
     params: MultiplyBYNBlockParams
 
     def __call__(self, input_df: pd.DataFrame):
-        logging.info(f"Multiplying all values in 'column_b' by {self.params.n}")
+        return self.run(input_df)
+
+    @log_run_info
+    def run(self, input_df: pd.DataFrame):
         result_df = input_df.copy()
         result_df["column_b"] *= self.params.n
         return result_df
@@ -54,25 +63,25 @@ class MultiplyByNBlock(BlockBase):
 def example():
     """Run a simple example of a computation workflow."""
     init_logging()
-    logging.info("Starting the computation sequence.")
+    print("Starting the computation sequence.")
 
     test_data = pd.DataFrame(
         {"ColumnA": list(range(10)), "ColumnB": list(range(10, 20))}
     )
-    logging.info(f"Running computation on data:")
-    logging.info(f"{test_data.head(10)}")
+    print(f"Running computation on data:")
+    print(f"{test_data.head(10)}")
 
     sequential_runner = SequentialRunner(
         block_map={
             1: PrepareBlock(),
             2: ParallelRunner(
                 block=AddNBlock(params=AddNBlockParams(n=5)),
-                chunk_size=5,
+                num_chunks=5,
                 use_thread_pool=True,
             ),
             3: ParallelRunner(
                 block=MultiplyByNBlock(params=MultiplyBYNBlockParams(n=2)),
-                chunk_size=5,
+                num_chunks=5,
                 use_thread_pool=True,
             ),
             4: SequentialRunner(
@@ -88,15 +97,18 @@ def example():
     )
 
     # Run the computation
+    start_time = time.time()
     result = sequential_runner(test_data)
+    duration = time.time() - start_time
+    duration = round(duration, 6)
 
     # Cleanup before viewing
     result = result.sort_values(by="column_a")
     result = result.reset_index(drop=True)
 
-    logging.info("Completed all computations.")
-    print(f"Cols: {result.columns}")
-    print(f"Head: {result.head(10)}")
+    print(f"\nCompleted all computations in {duration} seconds.")
+    print(f"Cols: {list(result.columns)}")
+    print(f"Head:\n{result.head(10)}")
 
 
 if __name__ == "__main__":

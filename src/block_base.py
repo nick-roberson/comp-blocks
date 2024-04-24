@@ -5,6 +5,7 @@ import pandas as pd
 from pydantic import BaseModel
 
 from src.params_base import BlockParamBase
+from src.utils.wrapper import log_run_info
 
 
 class BlockBase(BaseModel):
@@ -12,6 +13,7 @@ class BlockBase(BaseModel):
 
     params: BlockParamBase = BlockParamBase()
 
+    @log_run_info
     def __call__(self, input_df: pd.DataFrame) -> pd.DataFrame:
         """Call the block and return the result"""
         self.validate(input_df=input_df)
@@ -21,11 +23,7 @@ class BlockBase(BaseModel):
         retry_delay = self.params.retry_delay
         while num_attempts > 0:
             try:
-                start_time = time.time()
                 result = self.run(input_df=input_df)
-                logging.info(
-                    f"Block {self.__class__.__name__} ran in {time.time() - start_time:.2f} seconds."
-                )
                 return result
             except Exception as e:
                 num_attempts -= 1

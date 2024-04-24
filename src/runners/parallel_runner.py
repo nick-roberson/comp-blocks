@@ -6,6 +6,7 @@ from typing import List
 import pandas as pd
 
 from src.block_base import BlockBase
+from src.utils.wrapper import log_run_info
 
 
 class ParallelRunner(BlockBase):
@@ -53,30 +54,18 @@ class ParallelRunner(BlockBase):
             raise ValueError("chunk_size must be greater than 0")
 
     def split(self, input_df: pd.DataFrame) -> List[pd.DataFrame]:
-        """Split the dataframe into chunks"""
-        # Split the dataframe into num_chunks chunks
+        """Split the input dataframe into chunks based on the specified parameters."""
+        # If we are using num_chunks, split the dataframe into num_chunks
         if self.num_chunks is not None:
-            chunk_size = (
-                len(input_df) // self.num_chunks
-            )  # Determine size of each chunk
-            remainder = (
-                len(input_df) % self.num_chunks
-            )  # Determine if there's a remainder
-            chunks = [
-                input_df.iloc[i * chunk_size : (i + 1) * chunk_size]
-                for i in range(self.num_chunks)
+            chunk_size = len(input_df) // self.num_chunks
+            return [
+                input_df.iloc[i : i + chunk_size]
+                for i in range(0, len(input_df), chunk_size)
             ]
-            # If there's a remainder, add the last few rows to the last chunk
-            if remainder:
-                chunks[-1] = pd.concat([chunks[-1], input_df.iloc[-remainder:]])
-
-            return chunks
-
-        # Split the dataframe into chunks of size chunk_size
         elif self.chunk_size is not None:
             return [
                 input_df.iloc[i : i + self.chunk_size]
-                for i in range(0, input_df.shape[0], self.chunk_size)
+                for i in range(0, len(input_df), self.chunk_size)
             ]
         else:
             raise ValueError("Either num_chunks or chunk_size must be specified")
@@ -93,9 +82,6 @@ class ParallelRunner(BlockBase):
             # Submit the tasks
             futures = {}
             for chunk in chunks:
-                logging.debug(
-                    f"Running block {self.block.__class__} with chunk\n{chunk.head(10)}"
-                )
                 future = executor.submit(self.block, chunk)
                 futures[future] = chunk
 
@@ -117,9 +103,6 @@ class ParallelRunner(BlockBase):
             # Submit the tasks
             futures = {}
             for chunk in chunks:
-                logging.debug(
-                    f"Running block {self.block.__class__} with chunk\n{chunk.head(10)}"
-                )
                 future = executor.submit(self.block, chunk)
                 futures[future] = chunk
 
@@ -133,6 +116,7 @@ class ParallelRunner(BlockBase):
                     raise e
         return results
 
+    @log_run_info
     def run(self, input_df: pd.DataFrame) -> pd.DataFrame:
         """Run the blocks that the runner was initialized with in order
         from the first block to the last block. Passing the result of the
@@ -141,30 +125,16 @@ class ParallelRunner(BlockBase):
 
         # Generate the chunks
         chunks = self.split(input_df)
-        logging.debug(f"Split the dataframe into {len(chunks)} chunks")
 
         # Run in parallel
         results = []
         if self.use_process_pool:
             results = self.run_process_pool(chunks=chunks)
-            logging.debug(
-                f"Completed running ProcessPool block {self.runner_name} for block {self.block_name}"
-                f"with {len(results)}"
-            )
         elif self.use_thread_pool:
             results = self.run_thread_pool(chunks=chunks)
-            logging.debug(
-                f"Completed running ThreadPool block {self.runner_name} for block {self.block_name}"
-                f"with {len(results)}"
-            )
 
         # Merge the results
-        for result in results:
-            logging.debug(result.head(10))
-
         result = self.merge(results)
-        logging.debug(f"Merged the results into a dataframe with shape {result.shape}")
-        logging.debug(f"Head of the merged dataframe\n{result.head(10)}")
 
         # Return the result
         return result

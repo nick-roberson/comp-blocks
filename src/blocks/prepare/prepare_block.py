@@ -28,6 +28,8 @@ def convert_columns_to_snake_case(df: pd.DataFrame) -> pd.DataFrame:
 
 
 class PrepareBlockParams(BlockParamBase):
+    """Parameters for the PrepareBlock."""
+
     id_col: str = "id"
 
 

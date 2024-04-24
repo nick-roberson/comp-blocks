@@ -4,6 +4,7 @@ from typing import Dict
 import pandas as pd
 
 from src.block_base import BlockBase
+from src.utils.wrapper import log_run_info
 
 
 class SequentialRunner(BlockBase):
@@ -14,6 +15,7 @@ class SequentialRunner(BlockBase):
         """Override the validate method to add additional validation."""
         pass
 
+    @log_run_info
     def run(self, input_df: pd.DataFrame) -> pd.DataFrame:
         """Run the blocks that the runner was initialized with in order
         from the first block to the last block. Passing the result of the
