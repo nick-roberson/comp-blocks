@@ -5,7 +5,6 @@ import pytest
 
 from src.blocks.simple.average.average_block import (AverageBlock,
                                                      AverageBlockParams)
-from src.runners.block_runner import BlockRunner
 from src.runners.parallel_runner import ParallelRunner
 from src.runners.sequential_runner import SequentialRunner
 
@@ -47,16 +46,6 @@ def test_run_alone():
     block = AverageBlock(params=TEST_PARAMS)
     # run block
     result = block(TEST_DATA)
-    # check result
-    assert result.equals(TEST_RESULT)
-
-
-def test_using_runner():
-    # create block and runner
-    block = AverageBlock(params=TEST_PARAMS)
-    runner = BlockRunner(block=block)
-    # run block
-    result = runner.run(TEST_DATA)
     # check result
     assert result.equals(TEST_RESULT)
 

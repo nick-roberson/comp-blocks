@@ -58,15 +58,20 @@ class ParallelRunner(BlockBase):
         # If we are using num_chunks, split the dataframe into num_chunks
         if self.num_chunks is not None:
             chunk_size = len(input_df) // self.num_chunks
-            return [
-                input_df.iloc[i : i + chunk_size]
-                for i in range(0, len(input_df), chunk_size)
-            ]
+            remainder = len(input_df) % self.num_chunks
+            chunks = []
+            for i in range(self.num_chunks):
+                start_index = i * chunk_size + min(i, remainder)
+                end_index = start_index + chunk_size + (1 if i < remainder else 0)
+                chunks.append(input_df.iloc[start_index:end_index])
+            return chunks
+        # If we are using chunk_size, split the dataframe into chunks of chunk_size
         elif self.chunk_size is not None:
             return [
                 input_df.iloc[i : i + self.chunk_size]
                 for i in range(0, len(input_df), self.chunk_size)
             ]
+        # If neither num_chunks nor chunk_size is specified, raise an error
         else:
             raise ValueError("Either num_chunks or chunk_size must be specified")
 

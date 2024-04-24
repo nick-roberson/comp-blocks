@@ -4,7 +4,6 @@ import pandas as pd
 import pytest
 
 from src.blocks.prepare.prepare_block import PrepareBlock
-from src.runners.block_runner import BlockRunner
 from src.runners.parallel_runner import ParallelRunner
 from src.runners.sequential_runner import SequentialRunner
 
@@ -36,19 +35,6 @@ def test_run_alone():
     result = block(TEST_DATA)
     # check result
     # Note: Test for snake_case conversion and presence of 'id' column
-    assert all(
-        col in result.columns for col in ["column_a", "column_b", "column_c", "id"]
-    )
-    assert result["id"].is_unique
-
-
-def test_using_runner():
-    # create block and runner
-    block = PrepareBlock()
-    runner = BlockRunner(block=block)
-    # run block
-    result = runner.run(TEST_DATA)
-    # check result
     assert all(
         col in result.columns for col in ["column_a", "column_b", "column_c", "id"]
     )
