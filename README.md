@@ -33,10 +33,14 @@ Running computation on data:
 8        8       18
 9        9       19
 
+# Block Processing Starts using SequentialRunner
 2024-04-23 20:32:49 - INFO - [1322320f-4add-4be2-9ce8-eed048ee7fe9] Starting SequentialRunner at 2024-04-23 20:32:49.771941 with input shape (10, 2)
+
+# Example Run Block Alone
 2024-04-23 20:32:49 - INFO - [420bfd44-93dc-4adb-a2f4-b700b2f9df3f] Starting PrepareBlock at 2024-04-23 20:32:49.772022 with input shape (10, 2)
 2024-04-23 20:32:49 - INFO - [420bfd44-93dc-4adb-a2f4-b700b2f9df3f] Finished PrepareBlock at 2024-04-23 20:32:49.773199 in 0:00:00.001177 with output shape (10, 3)
 
+# Example Run Block using ParallelRunner
 2024-04-23 20:32:49 - INFO - [ed65e41f-77cd-4bed-9a63-5b02d8df9b7d] Starting ParallelRunner at 2024-04-23 20:32:49.773239 with input shape (10, 3)
 2024-04-23 20:32:49 - INFO - [84a2ba57-b786-4a5a-8483-27176c17246f] Starting AddNBlock at 2024-04-23 20:32:49.773411 with input shape (2, 3)
 2024-04-23 20:32:49 - INFO - [84a2ba57-b786-4a5a-8483-27176c17246f] Finished AddNBlock at 2024-04-23 20:32:49.773669 in 0:00:00.000258 with output shape (2, 3)
@@ -50,6 +54,7 @@ Running computation on data:
 2024-04-23 20:32:49 - INFO - [84a2ba57-b786-4a5a-8483-27176c17246f] Finished AddNBlock at 2024-04-23 20:32:49.774642 in 0:00:00.000529 with output shape (2, 3)
 2024-04-23 20:32:49 - INFO - [ed65e41f-77cd-4bed-9a63-5b02d8df9b7d] Finished ParallelRunner at 2024-04-23 20:32:49.775015 in 0:00:00.001776 with output shape (10, 3)
 
+# Example Run Block using ParallelRunner
 2024-04-23 20:32:49 - INFO - [2609a3c2-6065-4147-955b-f9fe654bc04b] Starting ParallelRunner at 2024-04-23 20:32:49.775046 with input shape (10, 3)
 2024-04-23 20:32:49 - INFO - [555adc6f-6192-4382-b14d-7ddcece803b5] Starting MultiplyByNBlock at 2024-04-23 20:32:49.775159 with input shape (2, 3)
 2024-04-23 20:32:49 - INFO - [555adc6f-6192-4382-b14d-7ddcece803b5] Starting MultiplyByNBlock at 2024-04-23 20:32:49.775274 with input shape (2, 3)
@@ -63,6 +68,7 @@ Running computation on data:
 2024-04-23 20:32:49 - INFO - [555adc6f-6192-4382-b14d-7ddcece803b5] Finished MultiplyByNBlock at 2024-04-23 20:32:49.776385 in 0:00:00.000570 with output shape (2, 3)
 2024-04-23 20:32:49 - INFO - [2609a3c2-6065-4147-955b-f9fe654bc04b] Finished ParallelRunner at 2024-04-23 20:32:49.776684 in 0:00:00.001638 with output shape (10, 3)
 
+# Example Run Block using SequentialRunner
 2024-04-23 20:32:49 - INFO - [d49b897c-2f9a-4238-bd98-1d0c4d80cede] Starting SequentialRunner at 2024-04-23 20:32:49.776713 with input shape (10, 3)
 2024-04-23 20:32:49 - INFO - [eb103c9a-7aec-42d0-9a16-a19a5ae4278f] Starting AverageBlock at 2024-04-23 20:32:49.776731 with input shape (10, 3)
 2024-04-23 20:32:49 - INFO - [eb103c9a-7aec-42d0-9a16-a19a5ae4278f] Finished AverageBlock at 2024-04-23 20:32:49.776985 in 0:00:00.000254 with output shape (10, 4)
