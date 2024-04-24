@@ -1,5 +1,6 @@
 import logging
 import time
+import uuid
 
 import pandas as pd
 from pydantic import BaseModel
@@ -11,7 +12,16 @@ from src.utils.wrapper import log_run_info
 class BlockBase(BaseModel):
     """Base class for all blocks, which are the building blocks of the pipeline."""
 
+    # Unique identifier for the block
+    id: str = str(uuid.uuid4())
+    # Parameters for the block
     params: BlockParamBase = BlockParamBase()
+
+    def __init__(self, **data):
+        """Initialize the block with the given parameters."""
+        # Assign new Id to the block and call the super constructor
+        data["id"] = str(uuid.uuid4())
+        super().__init__(**data)
 
     @log_run_info
     def __call__(self, input_df: pd.DataFrame) -> pd.DataFrame:
@@ -39,8 +49,11 @@ class BlockBase(BaseModel):
 
     def validate(self, input_df: pd.DataFrame) -> None:
         """Validate that all the required parameters are present."""
-        raise NotImplementedError
+        # Simple assertion that the input_df is not None
+        assert input_df is not None, "Input DataFrame is None"
 
     def run(self, input_df: pd.DataFrame) -> pd.DataFrame:
         """Run the block and return the result"""
-        raise NotImplementedError
+        raise NotImplementedError(
+            "The run method must be implemented in the derived class"
+        )

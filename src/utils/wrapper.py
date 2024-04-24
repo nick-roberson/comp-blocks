@@ -21,7 +21,7 @@ def log_run_info(func):
         block_name = self.__class__.__name__
         start_time = datetime.datetime.now()
         logger.info(
-            f"Starting {block_name} at {start_time} with input shape {input_df.shape}"
+            f"[{self.id}] Starting {block_name} at {start_time} with input shape {input_df.shape}"
         )
 
         # Call the original function
@@ -30,7 +30,7 @@ def log_run_info(func):
         # Log the run information
         end_time = datetime.datetime.now()
         logger.info(
-            f"Finished {block_name} at {end_time} in {end_time - start_time} with output shape {result_df.shape}"
+            f"[{self.id}] Finished {block_name} at {end_time} in {end_time - start_time} with output shape {result_df.shape}"
         )
         return result_df
 

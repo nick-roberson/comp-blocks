@@ -116,7 +116,6 @@ class ParallelRunner(BlockBase):
                     raise e
         return results
 
-    @log_run_info
     def run(self, input_df: pd.DataFrame) -> pd.DataFrame:
         """Run the blocks that the runner was initialized with in order
         from the first block to the last block. Passing the result of the
