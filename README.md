@@ -80,16 +80,17 @@ Completed all computations in 0.005119 seconds.
 Cols: ['id', 'column_a', 'column_b', 'column_a_avg']
 Head:
                  id  column_a  column_b  column_a_avg
-0  73d9d92cd0c229d2         0        30           4.5
-1  9bc4cd485fe277f9         1        32           4.5
-2  d362ce1155cb0aed         2        34           4.5
-3  6f322ab92247df40         3        36           4.5
-4  8fb0ab3bf31047c1         4        38           4.5
-5  89512ae1404ffa1a         5        40           4.5
-6  fb88400d2b8ff1c8         6        42           4.5
-7  c1cf06a78a87c1ab         7        44           4.5
-8  554e301e92851d82         8        46           4.5
-9  bc24c3a5ce2dbf73         9        48           4.5
+0  73d9d92cd0c229d2        10        10          19.0
+1  9bc4cd485fe277f9        12        11          19.0
+2  d362ce1155cb0aed        14        12          19.0
+3  6f322ab92247df40        16        13          19.0
+4  8fb0ab3bf31047c1        18        14          19.0
+5  89512ae1404ffa1a        20        15          19.0
+6  fb88400d2b8ff1c8        22        16          19.0
+7  c1cf06a78a87c1ab        24        17          19.0
+8  554e301e92851d82        26        18          19.0
+9  bc24c3a5ce2dbf73        28        19          19.0
+
 ```
 
 This will run the example.py file, which demonstrates how to use the framework and comes with a few simple and more complex examples.

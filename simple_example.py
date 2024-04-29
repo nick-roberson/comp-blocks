@@ -29,6 +29,7 @@ def init_logging():
 
 class AddNBlockParams(BlockParamBase):
     n: int
+    target_column: str
 
 
 class AddNBlock(BlockBase):
@@ -37,12 +38,13 @@ class AddNBlock(BlockBase):
     @override
     def run(self, input_df: pd.DataFrame):
         result_df = input_df.copy()
-        result_df["column_b"] += self.params.n
+        result_df[self.params.target_column] += self.params.n
         return result_df
 
 
 class MultiplyBYNBlockParams(BlockParamBase):
     n: int
+    target_column: str
 
 
 class MultiplyByNBlock(BlockBase):
@@ -51,7 +53,7 @@ class MultiplyByNBlock(BlockBase):
     @override
     def run(self, input_df: pd.DataFrame):
         result_df = input_df.copy()
-        result_df["column_b"] *= self.params.n
+        result_df[self.params.target_column] *= self.params.n
         return result_df
 
 
@@ -71,12 +73,14 @@ def example():
         block_map={
             1: PrepareBlock(),
             2: ParallelRunner(
-                block=AddNBlock(params=AddNBlockParams(n=5)),
+                block=AddNBlock(params=AddNBlockParams(n=5, target_column="column_a")),
                 num_chunks=5,
                 use_thread_pool=True,
             ),
             3: ParallelRunner(
-                block=MultiplyByNBlock(params=MultiplyBYNBlockParams(n=2)),
+                block=MultiplyByNBlock(
+                    params=MultiplyBYNBlockParams(n=2, target_column="column_a")
+                ),
                 num_chunks=5,
                 use_thread_pool=True,
             ),
