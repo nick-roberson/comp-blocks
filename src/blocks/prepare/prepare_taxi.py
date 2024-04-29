@@ -76,6 +76,14 @@ class PrepareTaxiBlock(BlockBase):
 
         # Extract useful features from the datetime object
         input_df["hour"] = input_df["edt_date"].dt.hour
+
+        # Granular break down of "morning" "midday" "afternoon" "evening" "night"
+        input_df["time_of_day"] = pd.cut(
+            input_df["hour"],
+            bins=[0, 6, 12, 18, 24],
+            labels=["night", "morning", "afternoon", "evening"],
+            right=False,
+        )
         input_df["am_or_pm"] = np.where(input_df["hour"] < 12, "am", "pm")
         input_df.loc[:, "am_or_pm"] = np.where(input_df["hour"] < 12, "am", "pm")
         input_df["weekday"] = input_df["edt_date"].dt.strftime("%a")
