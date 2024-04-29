@@ -16,9 +16,9 @@ Poetry is used to manage dependencies. To install the dependencies, run the foll
 
 ## Usage
 
-To view an example of this framework in action, run the following command:
+To view an example of this framework in action, run the following command (there is also a more detailed example in the taxi_model_example.py file, but requires a larger dataset and more complex env setup):
 ```bash
-% poetry run python taxi_model_example.py
+% poetry run python simple_example.py
 Starting the computation sequence.
 Running computation on data:
    ColumnA  ColumnB
