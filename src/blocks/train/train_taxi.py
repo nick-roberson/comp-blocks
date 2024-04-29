@@ -1,3 +1,4 @@
+import logging
 import os.path
 from typing import List, Tuple
 
@@ -5,18 +6,18 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from rich import print
 from typing_extensions import override
 
 from src.block_base import BlockBase
 from src.blocks.train.models.tabular_model import TabularModel
 from src.params_base import BlockParamBase
 
+logger = logging.getLogger(__name__)
+
 
 class TrainModelParams(BlockParamBase):
     """Parameters for the TrainTaxiModel."""
 
-    model_name: str = "TaxiFareRegrModel.pt"
     id_col: str = "id"
     cat_cols: list = ["hour", "am_or_pm", "weekday"]
     cont_cols: list = [
@@ -33,6 +34,7 @@ class TrainModelParams(BlockParamBase):
     epochs: int = 300
 
     # Model Params
+    model_file: str = "TaxiFareRegrModel.pt"
     model_layers: List[int] = [200, 100]
     model_dropout: float = 0.4
 
@@ -83,20 +85,20 @@ class TrainModelBlock(BlockBase):
         Returns:
             pd.DataFrame: The processed DataFrame, potentially with modifications or additional columns.
         """
-        print("******************************************** VALIDATE")
+        logger.debug("******************************************** VALIDATE")
         # Validate and convert columns to categories
         self.validate(input_df=input_df)
         self.convert_columns_to_categories(input_df=input_df)
 
         # Prepare tensors and setup model
-        print(
+        logger.debug(
             "******************************************** PREPARE TENSORS AND SETUP MODEL"
         )
         cats, conts, y = self.prepare_tensors(input_df=input_df)
         model, criterion, optimizer = self.setup_model(input_df=input_df, conts=conts)
 
         # Train
-        print("******************************************** TRAIN THE MODEL")
+        logger.debug("******************************************** TRAIN THE MODEL")
         losses = self.train_model(
             model=model,
             criterion=criterion,
@@ -107,7 +109,7 @@ class TrainModelBlock(BlockBase):
         )
 
         # Evaluate
-        print("******************************************** EVALUATE THE MODEL")
+        logger.debug("******************************************** EVALUATE THE MODEL")
         self.evaluate_model(
             model=model, criterion=criterion, cats=cats, conts=conts, y=y, losses=losses
         )
@@ -220,7 +222,7 @@ class TrainModelBlock(BlockBase):
             optimizer.step()
             losses.append(loss.item())
             if i % 25 == 0:
-                print(f"Epoch {i}: Loss = {loss.item():.8f}")
+                logger.debug(f"Epoch {i}: Loss = {loss.item():.8f}")
 
         return losses
 
@@ -251,7 +253,7 @@ class TrainModelBlock(BlockBase):
         with torch.no_grad():
             y_val = model(cat_test, con_test)
             loss = torch.sqrt(criterion(y_val, y_test))
-            print(f"Final RMSE: {loss:.8f}")
+            logger.debug(f"Final RMSE: {loss:.8f}")
 
         # Print some predictions
         predictions = []
@@ -262,17 +264,17 @@ class TrainModelBlock(BlockBase):
 
         # Sort the predictions by the difference between the predicted and actual values
         predictions.sort(key=lambda x: x[2])
-        print("Predictions:")
+        logger.debug("Predictions:")
         for i, (pred, actual, diff) in enumerate(predictions):
-            print(
+            logger.debug(
                 f"{i + 1:2}. Predicted: {pred:.4f}, Actual: {actual:.4f}, Diff: {diff:.4f}"
             )
 
         # Save the model if training is complete
         if len(losses) == self.params.epochs:
-            model_fp = os.path.abspath(self.params.model_name)
+            model_fp = os.path.abspath(self.params.model_file)
             torch.save(model.state_dict(), model_fp)
-            print(f"Model saved successfully to path '{model_fp}'")
+            logger.debug(f"Model saved successfully to path '{model_fp}'")
         else:
-            print("Model training incomplete.")
+            logger.debug("Model training incomplete.")
             raise ValueError("Model training incomplete.")

@@ -1,21 +1,20 @@
+import logging
 import os
 from typing import Tuple
 
 import numpy as np
 import pandas as pd
 import torch
-from rich import print
 from torch import nn
 
 from src.block_base import BlockBase
 from src.blocks.train.models.tabular_model import TabularModel
 from src.params_base import BlockParamBase
 
+logger = logging.getLogger(__name__)
+
 
 class PredictModelParams(BlockParamBase):
-
-    # Path to the trained model file
-    model_name: str = "TaxiFareRegrModel.pt"
 
     # Categorical columns to use for the model
     cat_cols: list = ["hour", "am_or_pm", "weekday"]
@@ -29,14 +28,13 @@ class PredictModelParams(BlockParamBase):
     ]
 
     # Model architecture parameters
+    model_file: str = "TaxiFareRegrModel.pt"
     model_layers: list = [200, 100]
     model_dropout: float = 0.4
 
-    # Target column
+    # Target column and prediction columns
     target_col: str = "fare_amount"
-    # Prediction column
     prediction_col: str = "predictions"
-    # Difference column
     difference_col: str = "difference"
 
 
@@ -55,7 +53,7 @@ class PredictBlock(BlockBase):
             nn.Module: The loaded PyTorch model.
         """
         # Get the path to the model file
-        model_path = os.path.join(os.getcwd(), self.params.model_name)
+        model_path = os.path.join(os.getcwd(), self.params.model_file)
 
         # Get the number of unique categories for each categorical feature, and set the embedding sizes
         cat_szs = [
@@ -111,8 +109,8 @@ class PredictBlock(BlockBase):
 
         Args:
             model (nn.Module): The trained model.
-            cats (torch.Tensor): Categorical features tensor.
-            conts (torch.Tensor): Continuous features tensor.
+            cats (torch.Tensor): Categorical feature's tensor.
+            conts (torch.Tensor): Continuous feature's tensor.
 
         Returns:
             np.ndarray: Predicted values.

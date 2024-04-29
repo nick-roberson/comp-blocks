@@ -1,7 +1,10 @@
+import logging
 from typing import List, Tuple
 
 import torch
 import torch.nn as nn
+
+logger = logging.getLogger(__name__)
 
 
 class TabularModel(nn.Module):
@@ -35,7 +38,7 @@ class TabularModel(nn.Module):
             layers (List[int]): List of integers where each integer specifies the number of neurons in a hidden layer.
             p (float, optional): Dropout probability used in the embedding dropout and each hidden layer. Defaults to 0.5.
         """
-        print(
+        logger.debug(
             f"Initializing TabularModel with {emb_szs}, {n_cont}, {out_sz}, {layers}, {p}"
         )
         super().__init__()
@@ -50,7 +53,7 @@ class TabularModel(nn.Module):
         ]
         layerlist.append(nn.Linear(layers[-1], out_sz))
         self.layers = nn.Sequential(*layerlist)
-        print(
+        logger.debug(
             f"TabularModel initialized with {self.embeds}, {self.emb_drop}, {self.bn_cont}, {self.layers}"
         )
 
