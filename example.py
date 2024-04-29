@@ -16,7 +16,7 @@ app = typer.Typer()
 
 # Params specifically for the taxi fare example
 TAXI_DATA = "data/NYCTaxiFares.csv"
-MODEL_NAME = "TaxiFareRegrModel.pt"
+MODEL_FILE = "TaxiFareRegrModel.pt"
 CATEGORICAL_COLUMNS = ["hour", "am_or_pm", "weekday"]
 CONTINUOUS_COLUMNS = [
     "pickup_latitude",
@@ -34,19 +34,21 @@ MODEL_LAYERS = [200, 100]
 MODEL_DROPOUT = 0.4
 
 
-def init_logging():
+def init_logging(verbose: bool = False):
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG if verbose else logging.INFO,
         format="%(asctime)s - %(levelname)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
 
 @app.command()
-def train_taxi():
+def train_taxi(
+    verbose: bool = False,
+):
     """Run a simple example of a computation workflow."""
     # Initialize logging and load the data
-    init_logging()
+    init_logging(verbose=verbose)
     test_data = pd.read_csv(TAXI_DATA)
     print(f"Loaded data with {len(test_data)} records.")
 
@@ -55,7 +57,7 @@ def train_taxi():
 
     # Create params for the training block
     train_params = TrainModelParams(
-        model_name=MODEL_NAME,
+        model_file=MODEL_FILE,
         cat_cols=CATEGORICAL_COLUMNS,
         cont_cols=CONTINUOUS_COLUMNS,
         y_col=TARGET_COLUMN,
@@ -68,7 +70,7 @@ def train_taxi():
 
     # Create params for the prediction block
     predict_params = PredictModelParams(
-        model_name=MODEL_NAME,
+        model_file=MODEL_FILE,
         cat_cols=CATEGORICAL_COLUMNS,
         cont_cols=CONTINUOUS_COLUMNS,
         model_layers=MODEL_LAYERS[:2],
