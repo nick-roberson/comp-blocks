@@ -85,20 +85,20 @@ class TrainModelBlock(BlockBase):
         Returns:
             pd.DataFrame: The processed DataFrame, potentially with modifications or additional columns.
         """
-        logger.debug("******************************************** VALIDATE")
+        logger.info("******************************************** VALIDATE")
         # Validate and convert columns to categories
         self.validate(input_df=input_df)
         self.convert_columns_to_categories(input_df=input_df)
 
         # Prepare tensors and setup model
-        logger.debug(
+        logger.info(
             "******************************************** PREPARE TENSORS AND SETUP MODEL"
         )
         cats, conts, y = self.prepare_tensors(input_df=input_df)
         model, criterion, optimizer = self.setup_model(input_df=input_df, conts=conts)
 
         # Train
-        logger.debug("******************************************** TRAIN THE MODEL")
+        logger.info("******************************************** TRAIN THE MODEL")
         losses = self.train_model(
             model=model,
             criterion=criterion,
@@ -109,7 +109,7 @@ class TrainModelBlock(BlockBase):
         )
 
         # Evaluate
-        logger.debug("******************************************** EVALUATE THE MODEL")
+        logger.info("******************************************** EVALUATE THE MODEL")
         self.evaluate_model(
             model=model, criterion=criterion, cats=cats, conts=conts, y=y, losses=losses
         )
@@ -135,14 +135,19 @@ class TrainModelBlock(BlockBase):
         Returns:
             Tuple[torch.Tensor, torch.Tensor, torch.Tensor]: Tensors for categorical features, continuous features, and target values.
         """
-        cats = np.stack(
-            [input_df[col].cat.codes.values for col in self.params.cat_cols], 1
-        )
-        conts = np.stack([input_df[col].values for col in self.params.cont_cols], 1)
+        cats = None
+        if self.params.cat_cols:
+            cats = np.stack(
+                [input_df[col].cat.codes.values for col in self.params.cat_cols], 1
+            )
+        conts = None
+        if self.params.cont_cols:
+            conts = np.stack([input_df[col].values for col in self.params.cont_cols], 1)
+
         y = input_df[self.params.y_col].values
         return (
-            torch.tensor(cats, dtype=torch.int64),
-            torch.tensor(conts, dtype=torch.float),
+            torch.tensor(cats, dtype=torch.int64) if cats is not None else None,
+            torch.tensor(conts, dtype=torch.float) if conts is not None else None,
             torch.tensor(y, dtype=torch.float).reshape(-1, 1),
         )
 
@@ -197,14 +202,22 @@ class TrainModelBlock(BlockBase):
         losses = []
 
         # Split the data into training and testing sets
-        cat_train, cat_test = (
-            cats[: self.params.batch_size - self.params.test_size],
-            cats[self.params.batch_size - self.params.test_size :],
-        )
-        con_train, con_test = (
-            conts[: self.params.batch_size - self.params.test_size],
-            conts[self.params.batch_size - self.params.test_size :],
-        )
+        cat_train, cat_test = torch.tensor([]), torch.tensor([])
+        if cats is not None and cats.size()[0] > 0:
+            cat_train, cat_test = (
+                cats[: self.params.batch_size - self.params.test_size],
+                cats[self.params.batch_size - self.params.test_size :],
+            )
+
+        # Create empty tensors if no continuous features are present
+        con_train, con_test = torch.tensor([]), torch.tensor([])
+        if conts is not None and conts.size()[0] > 0:
+            con_train, con_test = (
+                conts[: self.params.batch_size - self.params.test_size],
+                conts[self.params.batch_size - self.params.test_size :],
+            )
+
+        # Split the target data
         y_train, y_test = (
             y[: self.params.batch_size - self.params.test_size],
             y[self.params.batch_size - self.params.test_size :],
@@ -212,17 +225,22 @@ class TrainModelBlock(BlockBase):
 
         # Train the model
         for i in range(self.params.epochs):
+
+            # Forward pass: Compute predicted y by passing x to the model
             y_pred = model(cat_train, con_train)
 
-            # RMSE
+            # Roo Mean Squared Error
             loss = torch.sqrt(criterion(y_pred, y_train))
 
+            # Zero gradients, perform a backward pass, and update the weights
             optimizer.zero_grad()
+
+            # Compute the loss and perform a backward pass
             loss.backward()
             optimizer.step()
             losses.append(loss.item())
             if i % 25 == 0:
-                logger.debug(f"Epoch {i}: Loss = {loss.item():.8f}")
+                logger.info(f"Epoch {i}: Loss = {loss.item():.8f}")
 
         return losses
 
@@ -253,7 +271,7 @@ class TrainModelBlock(BlockBase):
         with torch.no_grad():
             y_val = model(cat_test, con_test)
             loss = torch.sqrt(criterion(y_val, y_test))
-            logger.debug(f"Final RMSE: {loss:.8f}")
+            logger.info(f"Final RMSE: {loss:.8f}")
 
         # Print some predictions
         predictions = []
@@ -264,9 +282,9 @@ class TrainModelBlock(BlockBase):
 
         # Sort the predictions by the difference between the predicted and actual values
         predictions.sort(key=lambda x: x[2])
-        logger.debug("Predictions:")
+        logger.info("Predictions:")
         for i, (pred, actual, diff) in enumerate(predictions):
-            logger.debug(
+            logger.info(
                 f"{i + 1:2}. Predicted: {pred:.4f}, Actual: {actual:.4f}, Diff: {diff:.4f}"
             )
 
@@ -274,7 +292,7 @@ class TrainModelBlock(BlockBase):
         if len(losses) == self.params.epochs:
             model_fp = os.path.abspath(self.params.model_file)
             torch.save(model.state_dict(), model_fp)
-            logger.debug(f"Model saved successfully to path '{model_fp}'")
+            logger.info(f"Model saved successfully to path '{model_fp}'")
         else:
-            logger.debug("Model training incomplete.")
+            logger.info("Model training incomplete.")
             raise ValueError("Model training incomplete.")

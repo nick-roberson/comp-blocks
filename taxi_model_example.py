@@ -5,10 +5,10 @@ import pandas as pd
 import typer
 from rich import print
 
-from src.blocks.predict.predict_taxi import PredictBlock, PredictModelParams
+from src.blocks.predict.predict_tabular import PredictBlock, PredictModelParams
 from src.blocks.prepare.prepare_taxi import (PrepareTaxiBlock,
                                              PrepareTaxiBlockParams)
-from src.blocks.train.train_taxi import TrainModelBlock, TrainModelParams
+from src.blocks.train.train_tabular import TrainModelBlock, TrainModelParams
 from src.runners.parallel_runner import ParallelRunner
 from src.runners.sequential_runner import SequentialRunner
 
@@ -17,7 +17,7 @@ app = typer.Typer()
 # Params specifically for the taxi fare example
 TAXI_DATA = "data/NYCTaxiFares.csv"
 MODEL_FILE = "TaxiFareRegrModel.pt"
-CATEGORICAL_COLUMNS = ["hour", "am_or_pm", "weekday"]
+CATEGORICAL_COLUMNS = ["hour", "am_or_pm", "weekday", "time_of_day"]
 CONTINUOUS_COLUMNS = [
     "pickup_latitude",
     "pickup_longitude",
@@ -29,17 +29,22 @@ CONTINUOUS_COLUMNS = [
 TARGET_COLUMN = "fare_amount"
 BATCH_SIZE = 60000
 TEST_SIZE = 12000
-EPOCHS = 300
+EPOCHS = 500
 MODEL_LAYERS = [200, 100]
 MODEL_DROPOUT = 0.4
 
 
 def init_logging(verbose: bool = False):
+    # Initialize logging
     logging.basicConfig(
         level=logging.DEBUG if verbose else logging.INFO,
         format="%(asctime)s - %(levelname)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
+
+    # Suppress warnings from pandas library in the logger
+    logging.getLogger("py4j").setLevel(logging.ERROR)
+    logging.getLogger("pandas").setLevel(logging.ERROR)
 
 
 @app.command()
