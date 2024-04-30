@@ -19,19 +19,49 @@ from src.utils.logging import init_logging
 app = typer.Typer()
 
 
+############################################################################################
+# AddNBlock
+############################################################################################
+
+
 class AddNBlockParams(BlockParamBase):
     n: int
     target_column: str
 
 
 class AddNBlock(BlockBase):
+    """Simple block to add a number to a column."""
+
     params: AddNBlockParams
 
     @override
+    def validate(self, input_df: pd.DataFrame) -> None:
+        """Validate that the input dataframe is not empty and that the target column exists and is numeric."""
+        if input_df.empty:
+            raise ValueError("Input dataframe must not be empty")
+        # check that col exists
+        if self.params.target_column not in input_df.columns:
+            raise ValueError(
+                f"Column {self.params.target_column} not found in input_df"
+            )
+        # check that col is numeric
+        if not pd.api.types.is_numeric_dtype(input_df[self.params.target_column]):
+            raise ValueError(f"Column {self.params.target_column} is not numeric")
+
+    @override
     def run(self, input_df: pd.DataFrame):
+        """Run the block and return the result"""
+        # Validate the input data
+        self.validate(input_df=input_df)
+        # Run the block
         result_df = input_df.copy()
         result_df[self.params.target_column] += self.params.n
         return result_df
+
+
+############################################################################################
+# MultiplyByNBlock
+############################################################################################
 
 
 class MultiplyBYNBlockParams(BlockParamBase):
@@ -40,10 +70,30 @@ class MultiplyBYNBlockParams(BlockParamBase):
 
 
 class MultiplyByNBlock(BlockBase):
+    """Simple block to multiply a column by a number."""
+
     params: MultiplyBYNBlockParams
 
     @override
+    def validate(self, input_df: pd.DataFrame) -> None:
+        """Validate that the input dataframe is not empty and that the target column exists and is numeric."""
+        if input_df.empty:
+            raise ValueError("Input dataframe must not be empty")
+        # check that col exists
+        if self.params.target_column not in input_df.columns:
+            raise ValueError(
+                f"Column {self.params.target_column} not found in input_df"
+            )
+        # check that col is numeric
+        if not pd.api.types.is_numeric_dtype(input_df[self.params.target_column]):
+            raise ValueError(f"Column {self.params.target_column} is not numeric")
+
+    @override
     def run(self, input_df: pd.DataFrame):
+        """Run the block and return the result"""
+        # Validate the input data
+        self.validate(input_df=input_df)
+        # Run the block
         result_df = input_df.copy()
         result_df[self.params.target_column] *= self.params.n
         return result_df
