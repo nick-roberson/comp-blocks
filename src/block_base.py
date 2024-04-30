@@ -6,6 +6,7 @@ import pandas as pd
 from pydantic import BaseModel
 
 from src.params_base import BlockParamBase
+from src.utils.logging import init_logging
 from src.utils.wrapper import log_run_info
 
 
@@ -19,13 +20,18 @@ class BlockBase(BaseModel):
 
     def __init__(self, **data):
         """Initialize the block with the given parameters."""
-        # Assign new Id to the block and call the super constructor
+        # Assign new id to the block and call the super constructor
         data["id"] = str(uuid.uuid4())
+        # Call the super constructor
         super().__init__(**data)
 
     @log_run_info
     def __call__(self, input_df: pd.DataFrame) -> pd.DataFrame:
         """Call the block and return the result"""
+        # Initialize the logging
+        init_logging(level=self.params.log_level)
+
+        # Validate the input data
         self.validate(input_df=input_df)
 
         # Run the block with any input data

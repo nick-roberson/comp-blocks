@@ -11,6 +11,7 @@ from src.blocks.prepare.prepare_taxi import (PrepareTaxiBlock,
 from src.blocks.train.train_tabular import TrainModelBlock, TrainModelParams
 from src.runners.parallel_runner import ParallelRunner
 from src.runners.sequential_runner import SequentialRunner
+from src.utils.logging import init_logging
 
 app = typer.Typer()
 
@@ -34,31 +35,20 @@ MODEL_LAYERS = [200, 100]
 MODEL_DROPOUT = 0.4
 
 
-def init_logging(verbose: bool = False):
-    # Initialize logging
-    logging.basicConfig(
-        level=logging.DEBUG if verbose else logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-
-    # Suppress warnings from pandas library in the logger
-    logging.getLogger("py4j").setLevel(logging.ERROR)
-    logging.getLogger("pandas").setLevel(logging.ERROR)
-
-
 @app.command()
 def train_taxi(
     verbose: bool = False,
 ):
-    """Run a simple example of a computation workflow."""
+    """Run a more complex model training example of a computation workflow."""
     # Initialize logging and load the data
-    init_logging(verbose=verbose)
+    init_logging(level="DEBUG" if verbose else "INFO")
+
+    # Read in the data
     test_data = pd.read_csv(TAXI_DATA)
     print(f"Loaded data with {len(test_data)} records.")
 
     # Create params for the preparation block
-    prepare_params = PrepareTaxiBlockParams(id_col="id")
+    prepare_params = PrepareTaxiBlockParams(id_col="id", log_level="DEBUG")
 
     # Create params for the training block
     train_params = TrainModelParams(
@@ -71,6 +61,9 @@ def train_taxi(
         epochs=EPOCHS,
         model_layers=MODEL_LAYERS,
         model_dropout=MODEL_DROPOUT,
+        # Base Params
+        num_retries=3,
+        log_level="INFO",
     )
 
     # Create params for the prediction block
@@ -80,20 +73,23 @@ def train_taxi(
         cont_cols=CONTINUOUS_COLUMNS,
         model_layers=MODEL_LAYERS[:2],
         model_dropout=MODEL_DROPOUT,
+        # Base Params
+        num_retries=3,
+        log_level="INFO",
     )
 
     # Create a sequential runner with a map of blocks to run
     sequential_runner = SequentialRunner(
         block_map={
-            # Prepare the data in parallel using a chunk size of 10,000
+            # (Parallel) Pre-process data
             1: ParallelRunner(
                 block=PrepareTaxiBlock(params=prepare_params),
                 chunk_size=10000,
                 use_thread_pool=True,
             ),
-            # Train the model in series
+            # (Sequential) Train the model
             2: TrainModelBlock(params=train_params),
-            # Predict in parallel using a chunk size of 10,000
+            # (Parallel) Predict using the model
             3: ParallelRunner(
                 block=PredictBlock(params=predict_params),
                 chunk_size=10000,

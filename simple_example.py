@@ -14,17 +14,9 @@ from src.blocks.simple.average.average_block import (AverageBlock,
 from src.params_base import BlockParamBase
 from src.runners.parallel_runner import ParallelRunner
 from src.runners.sequential_runner import SequentialRunner
-from src.utils.wrapper import log_run_info
+from src.utils.logging import init_logging
 
 app = typer.Typer()
-
-
-def init_logging():
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
 
 
 class AddNBlockParams(BlockParamBase):
@@ -58,9 +50,12 @@ class MultiplyByNBlock(BlockBase):
 
 
 @app.command()
-def example():
+def example(
+    verbose: bool = False,
+):
     """Run a simple example of a computation workflow."""
-    init_logging()
+    # Initialize logging and load the data
+    init_logging(level="DEBUG" if verbose else "INFO")
     print("Starting the computation sequence.")
 
     test_data = pd.DataFrame(
@@ -73,13 +68,17 @@ def example():
         block_map={
             1: PrepareBlock(),
             2: ParallelRunner(
-                block=AddNBlock(params=AddNBlockParams(n=5, target_column="column_a")),
+                block=AddNBlock(
+                    params=AddNBlockParams(n=5, target_column="column_a", num_retries=3)
+                ),
                 num_chunks=5,
                 use_thread_pool=True,
             ),
             3: ParallelRunner(
                 block=MultiplyByNBlock(
-                    params=MultiplyBYNBlockParams(n=2, target_column="column_a")
+                    params=MultiplyBYNBlockParams(
+                        n=2, target_column="column_a", num_retries=3
+                    )
                 ),
                 num_chunks=5,
                 use_thread_pool=True,
