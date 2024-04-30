@@ -116,7 +116,9 @@ def example(
 
     sequential_runner = SequentialRunner(
         block_map={
+            # Prepare the data
             1: PrepareBlock(),
+            # Run the AddNBlock in parallel
             2: ParallelRunner(
                 block=AddNBlock(
                     params=AddNBlockParams(n=5, target_column="column_a", num_retries=3)
@@ -124,6 +126,7 @@ def example(
                 num_chunks=5,
                 use_thread_pool=True,
             ),
+            # Run the MultiplyByNBlock in parallel
             3: ParallelRunner(
                 block=MultiplyByNBlock(
                     params=MultiplyBYNBlockParams(
@@ -133,6 +136,7 @@ def example(
                 num_chunks=5,
                 use_thread_pool=True,
             ),
+            # Run the AverageBlock sequentially by itself (just to show how it works)
             4: SequentialRunner(
                 block_map={
                     1: AverageBlock(
