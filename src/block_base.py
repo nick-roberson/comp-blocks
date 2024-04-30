@@ -37,6 +37,8 @@ class BlockBase(BaseModel):
         # Run the block with any input data
         num_attempts = self.params.attempts
         retry_delay = self.params.retry_delay
+
+        # Try to run the block multiple times in case of failure
         while num_attempts > 0:
             try:
                 result = self.run(input_df=input_df)
